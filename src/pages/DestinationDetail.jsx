@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, Heart, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  Star,
+  Heart,
+  Share2,
+  CheckCircle,
+} from "lucide-react"; // Tambah CheckCircle
 import { destinations } from "../data/destinations";
 
 const DestinationDetail = () => {
@@ -34,33 +41,64 @@ const DestinationDetail = () => {
     setIsFavorite(!isFavorite);
   };
 
-  // --- LOGIC 2: BOOKING (PESAN TIKET) ---
+  // --- LOGIC 2: BOOKING DENGAN CUSTOM POPUP ---
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // State untuk Popup
+
   const handleBooking = () => {
-    // 1. Siapkan data pesanan baru
+    // 1. Simpan data (Logic sama seperti sebelumnya)
     const newOrder = {
       ...destination,
-      date: new Date().toISOString(), // Simpan tanggal hari ini
-      orderId: Date.now(), // ID unik berdasarkan waktu
+      date: new Date().toISOString(),
+      orderId: Date.now(),
     };
 
-    // 2. Ambil data pesanan lama dari LocalStorage
     const existingOrders = JSON.parse(localStorage.getItem("orders")) || [];
-
-    // 3. Gabungkan (Pesanan baru ditaruh paling atas)
     const updatedOrders = [newOrder, ...existingOrders];
-
-    // 4. Simpan kembali ke LocalStorage
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
 
-    // 5. Beri notifikasi dan pindah ke halaman Pesanan
-    alert("Tiket berhasil dipesan!");
-    navigate("/orders");
+    // 2. GANTI ALERT DENGAN POPUP MODAL
+    setShowSuccessModal(true);
   };
 
   if (!destination) return null;
 
   return (
     <div className="min-h-screen bg-white pb-24">
+      {/* --- CUSTOM SUCCESS MODAL (POPUP) --- */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200">
+            {/* Icon Sukses */}
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Berhasil!</h3>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              Tiket ke{" "}
+              <span className="font-bold text-gray-800">
+                {destination.name}
+              </span>{" "}
+              berhasil diamankan. Selamat liburan!
+            </p>
+
+            <button
+              onClick={() => navigate("/orders")}
+              className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition active:scale-95"
+            >
+              Lihat Pesanan Saya
+            </button>
+
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="mt-4 text-gray-400 font-medium text-sm hover:text-gray-600"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header Gambar */}
       <div className="relative h-[40vh] w-full">
         <img
@@ -82,7 +120,6 @@ const DestinationDetail = () => {
               <Share2 className="w-5 h-5" />
             </button>
 
-            {/* Tombol Favorit */}
             <button
               onClick={toggleFavorite}
               className={`p-2 backdrop-blur-md rounded-full transition duration-300 ${
@@ -130,7 +167,7 @@ const DestinationDetail = () => {
         {/* Tombol Pesan Tiket */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 md:static md:border-0 md:bg-transparent md:p-0 md:mt-8">
           <button
-            onClick={handleBooking} // <--- FUNGSI PESAN DIPANGGIL DI SINI
+            onClick={handleBooking}
             className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition active:scale-95"
           >
             Pesan Tiket Sekarang

@@ -6,7 +6,6 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-// 1. KITA TAMBAH ICON 'TICKET' DI SINI
 import { Home, Compass, Heart, User, Plane, Ticket } from "lucide-react";
 
 // --- IMPORT HALAMAN ---
@@ -15,23 +14,21 @@ import DestinationsPage from "./pages/DestinationsPage";
 import ProfilePage from "./pages/ProfilePage";
 import DestinationDetail from "./pages/DestinationDetail";
 import FavoritesPage from "./pages/FavoritesPage";
-import OrdersPage from "./pages/OrdersPage"; // Pastikan halaman ini sudah dibuat
+import OrdersPage from "./pages/OrdersPage";
 
 // --- KOMPONEN NAVIGASI BAWAH (MOBILE) ---
 const BottomNav = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-  // 2. KITA TAMBAH MENU 'PESANAN' DI SINI
   const navItems = [
     { path: "/", label: "Beranda", icon: Home },
     { path: "/explore", label: "Jelajah", icon: Compass },
-    { path: "/orders", label: "Pesanan", icon: Ticket }, // <--- MENU BARU
+    { path: "/orders", label: "Pesanan", icon: Ticket },
     { path: "/favorites", label: "Simpan", icon: Heart },
     { path: "/profile", label: "Profil", icon: User },
   ];
 
-  // Sembunyikan navbar di halaman detail agar lebih luas
   if (location.pathname.startsWith("/destination/")) return null;
 
   return (
@@ -61,14 +58,12 @@ const BottomNav = () => {
 // --- KOMPONEN HEADER (DESKTOP) ---
 const Header = () => {
   const location = useLocation();
-  // Sembunyikan header di halaman detail
   if (location.pathname.startsWith("/destination/")) return null;
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-xl">
               <Plane className="w-6 h-6 text-white" />
@@ -76,7 +71,6 @@ const Header = () => {
             <h1 className="text-xl font-bold text-gray-900">Travel App</h1>
           </Link>
 
-          {/* Menu Desktop - UPDATE DI SINI JUGA */}
           <nav className="hidden md:flex md:gap-6">
             <Link
               to="/"
@@ -95,8 +89,7 @@ const Header = () => {
               className="text-gray-700 hover:text-blue-600 font-medium"
             >
               Pesanan
-            </Link>{" "}
-            {/* <--- BARU */}
+            </Link>
             <Link
               to="/favorites"
               className="text-gray-700 hover:text-blue-600 font-medium"
@@ -120,25 +113,27 @@ const Header = () => {
 export default function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 pb-20 md:pb-0 min-h-window">
+      {/* PENTING 1: Tambahkan 'flex flex-col' di div pembungkus utama */}
+      <div className="min-h-screen bg-gray-50 flex flex-col pb-20 md:pb-0">
         <Header />
 
-        {/* Definisi Routing (Pindah Halaman) */}
-        <main className="container mx-auto px-4 lg:px-8 py-6 md:py-8">
+        {/* PENTING 2: Tambahkan 'flex-1' di tag main */}
+        {/* 'flex-1' memaksa konten ini untuk memanjang memenuhi ruang kosong */}
+        <main className="container mx-auto px-4 lg:px-8 py-6 md:py-8 flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/explore" element={<DestinationsPage />} />
             <Route path="/destination/:id" element={<DestinationDetail />} />
             <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/orders" element={<OrdersPage />} />{" "}
-            {/* Pastikan Route ini ada */}
+            <Route path="/orders" element={<OrdersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </main>
 
         <BottomNav />
 
-        <footer className="hidden md:block bg-gray-900 text-white mt-16">
+        {/* PENTING 3: Footer akan otomatis terdorong ke bawah */}
+        <footer className="hidden md:block bg-gray-900 text-white mt-auto">
           <div className="container mx-auto px-4 lg:px-8 py-8 text-center">
             <p className="text-gray-300">
               © 2025 Travel Nusantara - Mustofa Kelompok 25

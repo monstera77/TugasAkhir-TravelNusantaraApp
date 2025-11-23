@@ -11,6 +11,21 @@ export const OrderController = {
     }
   },
 
+  // TAMBAHAN: Controller Update
+  async updateOrder(req, res) {
+    try {
+      // Kita hanya izinkan edit 'date' dan 'status'
+      const { date, status } = req.body;
+      const updatedOrder = await OrderModel.update(req.params.id, {
+        date,
+        status,
+      });
+      res.json(updatedOrder);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   // Lihat Pesanan
   async getOrders(req, res) {
     try {

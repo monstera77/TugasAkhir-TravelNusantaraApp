@@ -13,7 +13,9 @@ const DestinationsPage = () => {
 
   // --- AMBIL DATA DARI API ---
   useEffect(() => {
-    fetch("http://localhost:3000/api/destinations")
+    fetch(
+      "http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/destinations"
+    )
       .then((res) => res.json())
       .then((data) => setDestinations(data))
       .catch((err) => console.error(err));

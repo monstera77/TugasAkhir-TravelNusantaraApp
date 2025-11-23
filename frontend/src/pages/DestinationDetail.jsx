@@ -18,7 +18,9 @@ const DestinationDetail = () => {
 
   // --- GET DATA WISATA DARI API ---
   useEffect(() => {
-    fetch(`http://localhost:3000/api/destinations/${id}`)
+    fetch(
+      `http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/destinations/${id}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setDestination(data);
@@ -89,11 +91,14 @@ const DestinationDetail = () => {
 
     try {
       // KIRIM KE API
-      const response = await fetch("http://localhost:3000/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
+      const response = await fetch(
+        "http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/orders",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData),
+        }
+      );
 
       if (response.ok) {
         setShowSuccessModal(true); // Tampilkan Popup Sukses

@@ -31,7 +31,9 @@ const OrdersPage = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/orders");
+      const response = await fetch(
+        "http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/orders"
+      );
       const data = await response.json();
       setOrders(data);
     } catch (error) {
@@ -51,11 +53,17 @@ const OrdersPage = () => {
   const confirmDelete = async () => {
     try {
       if (targetDeleteId === "ALL") {
-        await fetch("http://localhost:3000/api/orders", { method: "DELETE" });
+        await fetch(
+          "http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/orders",
+          { method: "DELETE" }
+        );
       } else {
-        await fetch(`http://localhost:3000/api/orders/${targetDeleteId}`, {
-          method: "DELETE",
-        });
+        await fetch(
+          `http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/orders/${targetDeleteId}`,
+          {
+            method: "DELETE",
+          }
+        );
       }
       fetchOrders();
     } catch (error) {
@@ -79,7 +87,7 @@ const OrdersPage = () => {
   const confirmUpdate = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/orders/${editingOrder.id}`,
+        `http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/orders/${editingOrder.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

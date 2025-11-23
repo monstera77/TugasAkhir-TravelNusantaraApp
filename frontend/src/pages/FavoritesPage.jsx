@@ -12,7 +12,9 @@ const FavoritesPage = () => {
     const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
     // 2. Ambil DATA LENGKAP dari API
-    fetch("http://localhost:3000/api/destinations")
+    fetch(
+      "http://https://tugas-akhir-travel-nusantara-app.vercel.app//api/destinations"
+    )
       .then((res) => res.json())
       .then((allDestinations) => {
         // 3. Filter data API yang ID-nya ada di LocalStorage

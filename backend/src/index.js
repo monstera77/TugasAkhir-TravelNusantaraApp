@@ -10,7 +10,13 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // Agar Frontend bisa akses Backend
+app.use(
+  cors({
+    origin: "*", // Boleh diakses dari semua alamat (Frontend Vercel, HP, Laptop)
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Routes Utama

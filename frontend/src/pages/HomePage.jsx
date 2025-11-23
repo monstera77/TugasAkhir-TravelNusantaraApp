@@ -17,7 +17,9 @@ const HomePage = () => {
       setIsOffline(true);
     }
 
-    fetch("http://localhost:3000/api/destinations")
+    fetch(
+      "http://https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations"
+    )
       .then((response) => response.json())
       .then((data) => {
         setDestinations(data);

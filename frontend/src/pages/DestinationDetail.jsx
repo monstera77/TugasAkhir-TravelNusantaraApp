@@ -19,7 +19,7 @@ const DestinationDetail = () => {
   // --- GET DATA WISATA DARI API ---
   useEffect(() => {
     fetch(
-      `http://https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations/${id}`
+      `https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations/${id}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -92,7 +92,7 @@ const DestinationDetail = () => {
     try {
       // KIRIM KE API
       const response = await fetch(
-        "http://https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders",
+        "https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

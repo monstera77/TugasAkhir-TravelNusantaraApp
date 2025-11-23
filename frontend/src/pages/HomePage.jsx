@@ -18,7 +18,7 @@ const HomePage = () => {
     }
 
     fetch(
-      "http://https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations"
+      "https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations"
     )
       .then((response) => response.json())
       .then((data) => {

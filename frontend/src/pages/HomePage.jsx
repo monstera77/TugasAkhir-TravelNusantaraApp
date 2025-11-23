@@ -45,7 +45,7 @@ const HomePage = () => {
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
+      <div className="bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
             Jelajahi Indonesia

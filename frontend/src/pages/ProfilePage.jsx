@@ -5,7 +5,7 @@ import profileImg from "../assets/profile.jpeg"; // Pastikan nama file sesuai
 const ProfilePage = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-24 md:pb-0">
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-10 text-white shadow-xl">
+      <div className="bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-10 text-white shadow-xl">
         <div className="flex items-center gap-6">
           {/* 2. GUNAKAN VARIABEL IMPORT DI SRC */}
           <img

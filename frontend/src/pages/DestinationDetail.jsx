@@ -157,7 +157,7 @@ const DestinationDetail = () => {
           alt={destination.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-gradient-to-b from-black/50 to-transparent">
+        <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-linear-to-b from-black/50 to-transparent">
           <button
             onClick={() => navigate(-1)}
             className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30"

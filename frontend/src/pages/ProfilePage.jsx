@@ -1,17 +1,22 @@
 import React from "react";
+// 1. IMPORT GAMBAR DARI ASET LOKAL
+import profileImg from "../assets/profile.jpeg"; // Pastikan nama file sesuai
 
 const ProfilePage = () => {
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-10 text-white shadow-xl">
+    <div className="max-w-3xl mx-auto space-y-6 pb-24 md:pb-0">
+      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 rounded-3xl p-10 text-white shadow-xl">
         <div className="flex items-center gap-6">
+          {/* 2. GUNAKAN VARIABEL IMPORT DI SRC */}
           <img
-            src="https://github.com/monstera77.png"
+            src={profileImg}
             alt="Foto Profil Mustofa Ahmad Rusli"
             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
           />
           <div>
-            <h1 className="text-4xl font-bold mb-2">Profil Mahasiswa</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2">
+              Profil Mahasiswa
+            </h1>
             <p className="text-blue-100 text-lg">
               Informasi Pengembang Aplikasi
             </p>
@@ -67,6 +72,8 @@ const ProfilePage = () => {
               "Tailwind CSS",
               "vite-plugin-pwa",
               "JavaScript",
+              "Supabase", // Tambahan
+              "Express.js", // Tambahan
             ].map((tech) => (
               <span
                 key={tech}

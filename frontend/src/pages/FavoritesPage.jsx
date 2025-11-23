@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Search } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DestinationCard from "../components/DestinationCard";
-import { destinations } from "../data/destinations";
 
 const FavoritesPage = () => {
   const navigate = useNavigate();
   const [favoriteDestinations, setFavoriteDestinations] = useState([]);
 
   useEffect(() => {
-    // 1. Ambil data ID favorit dari LocalStorage
+    // 1. Ambil ID Favorit dari LocalStorage
     const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-    // 2. Filter data asli berdasarkan ID yang disimpan
-    const favs = destinations.filter((dest) =>
-      storedFavorites.includes(dest.id)
-    );
-
-    setFavoriteDestinations(favs);
+    // 2. Ambil DATA LENGKAP dari API
+    fetch("http://localhost:3000/api/destinations")
+      .then((res) => res.json())
+      .then((allDestinations) => {
+        // 3. Filter data API yang ID-nya ada di LocalStorage
+        const favs = allDestinations.filter((dest) =>
+          storedFavorites.includes(dest.id)
+        );
+        setFavoriteDestinations(favs);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   return (
@@ -38,7 +42,6 @@ const FavoritesPage = () => {
           ))}
         </div>
       ) : (
-        // Tampilan jika belum ada yang difavoritkan
         <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8">
           <div className="bg-red-50 p-6 rounded-full mb-4 animate-pulse">
             <Heart className="w-12 h-12 text-red-400 fill-red-400" />

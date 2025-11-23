@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // <--- Import Navigasi
+import { useNavigate } from "react-router-dom";
 import DestinationCard from "../components/DestinationCard";
 import Pagination from "../components/Pagination";
-import { destinations } from "../data/destinations";
 
 const DestinationsPage = () => {
-  const navigate = useNavigate(); // <--- Hook Navigasi
+  const navigate = useNavigate();
+  const [destinations, setDestinations] = useState([]); // State Data API
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+
+  // --- AMBIL DATA DARI API ---
+  useEffect(() => {
+    fetch("http://localhost:3000/api/destinations")
+      .then((res) => res.json())
+      .then((data) => setDestinations(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   // Filter Logic
   const filteredDestinations = destinations.filter(
@@ -19,7 +27,6 @@ const DestinationsPage = () => {
       dest.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Reset halaman ke 1 kalau user mengetik search baru
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
@@ -35,7 +42,6 @@ const DestinationsPage = () => {
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-      {/* Header */}
       <div className="px-2">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Semua Destinasi
@@ -63,7 +69,7 @@ const DestinationsPage = () => {
               <DestinationCard
                 key={dest.id}
                 destination={dest}
-                onClick={() => navigate(`/destination/${dest.id}`)} // <--- Langsung navigasi
+                onClick={() => navigate(`/destination/${dest.id}`)}
               />
             ))}
           </div>
@@ -77,17 +83,15 @@ const DestinationsPage = () => {
           )}
         </>
       ) : (
-        // Tampilan kalau tidak ada hasil search
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
           <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
-            Tidak ada destinasi ditemukan
+            {destinations.length === 0
+              ? "Memuat data..."
+              : "Tidak ada destinasi ditemukan"}
           </h3>
-          <p className="text-gray-500 max-w-xs mx-auto">
-            Coba gunakan kata kunci lain seperti "Pantai" atau nama kota.
-          </p>
         </div>
       )}
     </div>

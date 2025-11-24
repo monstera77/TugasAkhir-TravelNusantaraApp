@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import {
   Calendar,
@@ -8,65 +7,48 @@ import {
   Edit2,
   X,
   Save,
-} from "lucide-react"; // Tambah Icon Edit2, Save
+  Ticket,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../services/supabaseClient";
 
 const OrdersPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Ini harus dipakai di bawah
   const [orders, setOrders] = useState([]);
 
-  // State Modal Hapus
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [targetDeleteId, setTargetDeleteId] = useState(null);
-
-  // State Modal Edit (UPDATE)
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingOrder, setEditingOrder] = useState(null); // Data tiket yang sedang diedit
-  const [newDate, setNewDate] = useState(""); // Tanggal baru yang dipilih
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [newDate, setNewDate] = useState("");
 
-  // --- READ ---
+  // --- READ (SUPABASE) ---
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (error)
+      console.error("Error fetching:", error); // Fix: Gunakan variable error
+    else setOrders(data);
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch(
-        "https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders"
-      );
-      const data = await response.json();
-      setOrders(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // --- DELETE LOGIC ---
-  const triggerDeleteOne = (id) => {
-    setTargetDeleteId(id);
-    setShowDeleteModal(true);
-  };
-  const triggerDeleteAll = () => {
-    setTargetDeleteId("ALL");
-    setShowDeleteModal(true);
-  };
+  // --- DELETE (SUPABASE) ---
   const confirmDelete = async () => {
     try {
       if (targetDeleteId === "ALL") {
-        await fetch(
-          "https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders",
-          { method: "DELETE" }
-        );
+        await supabase.from("orders").delete().neq("id", 0);
       } else {
-        await fetch(
-          `https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders/${targetDeleteId}`,
-          {
-            method: "DELETE",
-          }
-        );
+        await supabase.from("orders").delete().eq("id", targetDeleteId);
       }
       fetchOrders();
     } catch (error) {
+      console.error(error); // Fix: Gunakan variable error
       alert("Gagal menghapus.");
     } finally {
       setShowDeleteModal(false);
@@ -74,209 +56,168 @@ const OrdersPage = () => {
     }
   };
 
-  // --- UPDATE LOGIC (BARU) ---
-  const triggerEdit = (order) => {
-    setEditingOrder(order);
-    // Format tanggal untuk input date HTML (YYYY-MM-DD)
-    const dateObj = new Date(order.date);
-    const formattedDate = dateObj.toISOString().split("T")[0];
-    setNewDate(formattedDate);
-    setShowEditModal(true);
-  };
-
+  // --- UPDATE (SUPABASE) ---
   const confirmUpdate = async () => {
     try {
-      const response = await fetch(
-        `https://tugas-akhir-travel-nusantara-app.vercel.app/api/orders/${editingOrder.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date: new Date(newDate).toISOString(), // Kirim tanggal baru
-            status: "Reschedule", // Ubah status jadi Reschedule
-          }),
-        }
-      );
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          date: new Date(newDate).toISOString(),
+          status: "Reschedule",
+        })
+        .eq("id", editingOrder.id);
 
-      if (response.ok) {
-        fetchOrders(); // Refresh data
+      if (!error) {
+        fetchOrders();
         setShowEditModal(false);
         setEditingOrder(null);
       } else {
-        alert("Gagal mengupdate tiket.");
+        alert("Gagal update: " + error.message);
       }
     } catch (error) {
-      console.error(error);
-      alert("Terjadi kesalahan.");
+      console.error(error); // Fix: Gunakan variable error
     }
+  };
+
+  const triggerDeleteOne = (e, id) => {
+    e.stopPropagation();
+    setTargetDeleteId(id);
+    setShowDeleteModal(true);
+  };
+  const triggerEdit = (e, order) => {
+    e.stopPropagation();
+    setEditingOrder(order);
+    setNewDate(new Date(order.date).toISOString().split("T")[0]);
+    setShowEditModal(true);
+  };
+  const triggerDeleteAll = () => {
+    setTargetDeleteId("ALL");
+    setShowDeleteModal(true);
   };
 
   return (
     <div className="space-y-6 pb-24 md:pb-8">
-      {/* --- MODAL EDIT (UPDATE) --- */}
+      {/* Modal Edit */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Ubah Jadwal</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm">
+            <div className="flex justify-between mb-4">
+              <h3 className="font-bold">Ubah Jadwal</h3>
               <button onClick={() => setShowEditModal(false)}>
-                <X className="w-6 h-6 text-gray-400" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-
-            <p className="text-sm text-gray-500 mb-2">
-              Pilih tanggal keberangkatan baru:
-            </p>
             <input
               type="date"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl font-bold text-gray-700 mb-6 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border p-2 rounded mb-4"
             />
-
             <button
               onClick={confirmUpdate}
-              className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 text-white py-2 rounded flex items-center justify-center gap-2"
             >
-              <Save className="w-5 h-5" /> Simpan Perubahan
+              <Save className="w-4 h-4" /> Simpan
             </button>
           </div>
         </div>
       )}
 
-      {/* --- MODAL HAPUS --- */}
+      {/* Modal Hapus */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {targetDeleteId === "ALL" ? "Hapus Semua?" : "Hapus Tiket Ini?"}
-            </h3>
-            <div className="flex gap-3 mt-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center">
+            <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+            <h3 className="font-bold mb-4">Hapus?</h3>
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl"
+                className="flex-1 bg-gray-100 py-2 rounded"
               >
                 Batal
               </button>
               <button
                 onClick={confirmDelete}
-                className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl shadow-lg"
+                className="flex-1 bg-red-600 text-white py-2 rounded"
               >
-                Ya, Hapus
+                Hapus
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Header */}
-      <div className="px-4 pt-4 flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
-            Pesanan Saya
-          </h1>
-          <p className="text-gray-500 text-sm">Kelola tiket perjalanan Anda</p>
-        </div>
+      <div className="px-4 pt-4 flex justify-between">
+        <h1 className="text-3xl font-bold">Pesanan Saya</h1>
         {orders.length > 0 && (
           <button
             onClick={triggerDeleteAll}
-            className="text-xs font-bold text-red-500 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition"
+            className="text-red-500 font-bold text-xs bg-red-50 px-2 py-1 rounded"
           >
             Hapus Semua
           </button>
         )}
       </div>
 
-      {/* List Orders */}
       {orders.length > 0 ? (
         <div className="space-y-4 px-4">
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col md:flex-row"
+              className="bg-white rounded-2xl shadow border flex overflow-hidden group hover:shadow-md transition"
             >
-              {/* Gambar */}
-              <div className="h-32 md:h-auto md:w-40 bg-gray-200 relative">
+              <div className="w-32 bg-gray-200 relative">
                 <img
                   src={order.image}
-                  alt={order.fullName}
                   className="w-full h-full object-cover"
+                  alt={order.fullName}
                 />
-                <div className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
+                <div className="absolute top-1 left-1 bg-blue-600 text-white text-[10px] px-1 rounded">
                   TIKET
                 </div>
               </div>
-
-              {/* Info */}
-              <div className="p-4 flex-1 relative">
-                <div className="absolute top-4 right-4 flex gap-2">
-                  {/* TOMBOL EDIT (BARU) */}
-                  <button
-                    onClick={() => triggerEdit(order)}
-                    className="text-gray-300 hover:text-blue-500 transition"
-                    title="Ubah Jadwal"
-                  >
-                    <Edit2 className="w-5 h-5" />
+              <div className="p-3 flex-1 relative">
+                <div className="absolute top-2 right-2 flex gap-1 bg-white/80 p-1 rounded shadow-sm">
+                  <button onClick={(e) => triggerEdit(e, order)}>
+                    <Edit2 className="w-4 h-4 text-blue-500" />
                   </button>
-                  {/* TOMBOL HAPUS */}
-                  <button
-                    onClick={() => triggerDeleteOne(order.id)}
-                    className="text-gray-300 hover:text-red-500 transition"
-                    title="Hapus"
-                  >
-                    <Trash2 className="w-5 h-5" />
+                  <button onClick={(e) => triggerDeleteOne(e, order.id)}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </div>
-
-                <h3 className="font-bold text-lg text-gray-900 pr-16 line-clamp-1">
-                  {order.fullName || order.fullname || order.name}
+                <h3 className="font-bold line-clamp-1 pr-12">
+                  {order.fullName}
                 </h3>
-
-                <div className="flex items-center text-gray-500 mt-1 text-xs md:text-sm">
-                  <MapPin className="w-3 h-3 mr-1" />
-                  {order.location}
+                <div className="text-xs text-gray-500 mt-1">
+                  <MapPin className="w-3 h-3 inline" /> {order.location}
                 </div>
-
-                <div className="flex items-center text-gray-500 mt-1 text-xs md:text-sm">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  {new Date(order.date).toLocaleDateString("id-ID", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                <div className="text-xs text-gray-500">
+                  <Calendar className="w-3 h-3 inline" />{" "}
+                  {new Date(order.date).toLocaleDateString()}
                 </div>
-
-                <hr className="my-3 border-dashed border-gray-200" />
-
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`px-2 py-1 rounded text-[10px] font-bold border ${
-                      order.status === "Reschedule"
-                        ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                        : "bg-green-50 text-green-700 border-green-100"
-                    }`}
-                  >
-                    {order.status || "LUNAS"}
+                <div className="mt-2 flex justify-between items-center">
+                  <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded">
+                    {order.status || "Lunas"}
                   </span>
-                  <span className="text-gray-400 text-xs font-mono">
-                    ID: #{order.id}
-                  </span>
+                  <span className="text-[10px] text-gray-400">#{order.id}</span>
                 </div>
+                {order.visitor_name && (
+                  <div className="text-[10px] text-gray-500 mt-1">
+                    Pemesan: {order.visitor_name}
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center px-8">
-          {/* Tampilan Kosong sama seperti sebelumnya... */}
-          <p className="text-gray-500">Belum ada pesanan.</p>
+        <div className="text-center py-20 px-4">
+          <Ticket className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500 mb-4">Belum ada pesanan.</p>
+          {/* Fix: Tombol ini menggunakan navigate */}
           <button
             onClick={() => navigate("/explore")}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-full shadow-lg"
+            className="px-6 py-2 bg-blue-600 text-white rounded-full shadow-lg"
           >
             Cari Tiket
           </button>

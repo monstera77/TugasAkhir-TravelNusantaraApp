@@ -1,37 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, WifiOff } from "lucide-react"; // Tambah icon WifiOff
+import { MapPin, WifiOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DestinationCard from "../components/DestinationCard";
 import Pagination from "../components/Pagination";
+import { supabase } from "../services/supabaseClient"; // IMPORT SUPABASE
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [destinations, setDestinations] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isOffline, setIsOffline] = useState(false); // State untuk cek offline
+  const [isOffline, setIsOffline] = useState(false);
   const itemsPerPage = 6;
 
   useEffect(() => {
-    // Cek koneksi saat pertama kali buka
-    if (!navigator.onLine) {
-      setIsOffline(true);
-    }
+    const fetchData = async () => {
+      // Cek koneksi internet browser dulu
+      if (!navigator.onLine) {
+        setIsOffline(true);
+        return;
+      }
 
-    fetch(
-      "https://tugas-akhir-travel-nusantara-app.vercel.app/api/destinations"
-    )
-      .then((response) => response.json())
-      .then((data) => {
+      // AMBIL DATA LANGSUNG DARI SUPABASE
+      const { data, error } = await supabase
+        .from("destinations")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Error Supabase:", error);
+        setIsOffline(true);
+      } else {
         setDestinations(data);
-        setIsOffline(false); // Kalau berhasil ambil data, berarti online
-      })
-      .catch((error) => {
-        console.error("Gagal mengambil data:", error);
-        setIsOffline(true); // Kalau gagal, anggap offline/server mati
-      });
+        setIsOffline(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  // Logic Pagination
   const totalPages = Math.ceil(destinations.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -39,10 +45,6 @@ const HomePage = () => {
     indexOfFirstItem,
     indexOfLastItem
   );
-
-  const handleCardClick = (id) => {
-    navigate(`/destination/${id}`);
-  };
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
@@ -56,7 +58,6 @@ const HomePage = () => {
             Temukan destinasi wisata terbaik di Nusantara
           </p>
 
-          {/* GANTI LOGIC TAMPILAN JUMLAH DESTINASI */}
           {isOffline ? (
             <div className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-md border border-red-400/30 rounded-xl px-5 py-3 shadow-lg">
               <WifiOff className="w-6 h-6 text-white" />
@@ -74,7 +75,7 @@ const HomePage = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
       </div>
 
-      {/* --- TAMPILAN JIKA OFFLINE --- */}
+      {/* Content */}
       {isOffline ? (
         <div className="text-center py-16 px-4">
           <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -83,19 +84,14 @@ const HomePage = () => {
           <h3 className="text-xl font-bold text-gray-800 mb-2">
             Tidak Ada Koneksi
           </h3>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Sepertinya Anda sedang offline atau server tidak dapat dihubungi.
-            Silakan periksa koneksi internet Anda untuk melihat data terbaru.
-          </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition"
+            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-full"
           >
             Coba Lagi
           </button>
         </div>
       ) : (
-        // --- TAMPILAN NORMAL (ONLINE) ---
         <>
           <div className="flex justify-between items-center text-gray-600 px-2">
             <p>
@@ -106,25 +102,21 @@ const HomePage = () => {
               destinasi terpopuler
             </p>
           </div>
-
-          {/* Grid Destinasi */}
           {destinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentDestinations.map((dest) => (
                 <DestinationCard
                   key={dest.id}
                   destination={dest}
-                  onClick={() => handleCardClick(dest.id)}
+                  onClick={() => navigate(`/destination/${dest.id}`)}
                 />
               ))}
             </div>
           ) : (
             <div className="text-center py-20 text-gray-500">
-              Memuat data dari server...
+              Memuat data...
             </div>
           )}
-
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination
               currentPage={currentPage}

@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DestinationDetail from "./pages/DestinationDetail";
 import FavoritesPage from "./pages/FavoritesPage";
 import OrdersPage from "./pages/OrdersPage";
+import AddDestinationPage from "./pages/AddDestinationPage";
 
 // --- KOMPONEN NAVIGASI BAWAH (MOBILE) ---
 const BottomNav = () => {
@@ -127,6 +128,7 @@ export default function App() {
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/add-destination" element={<AddDestinationPage />} />
           </Routes>
         </main>
 

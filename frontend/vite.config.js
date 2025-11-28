@@ -8,6 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+
       manifest: {
         name: "Travel Nusantara",
         short_name: "TravelApp",
@@ -31,20 +32,22 @@ export default defineConfig({
           },
         ],
       },
+
       workbox: {
         // 1. Cache file statis (HTML, CSS, JS, Icon Lokal)
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg}"],
 
         runtimeCaching: [
           {
-            // Cache API Supabase (Agar data teks wisata tersimpan)
+            // 2. Cache API Supabase (Data Teks)
+            // Ganti jadi StaleWhileRevalidate: Tampilkan Cache DULU biar cepat, baru update.
             urlPattern: ({ url }) => url.origin.includes("supabase.co"),
-            handler: "NetworkFirst", // Coba internet dulu, kalau mati baru ambil cache
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: "api-supabase-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // Simpan 1 Hari
+                maxAgeSeconds: 60 * 60 * 24 * 30, // Simpan 30 Hari
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -52,13 +55,15 @@ export default defineConfig({
             },
           },
           {
+            // 3. Cache Gambar Unsplash
+            // Ganti jadi CacheFirst: Hemat kuota, jangan download ulang gambar yang sama.
             urlPattern: ({ url }) => url.origin.includes("unsplash.com"),
-            handler: "StaleWhileRevalidate", // Tampilkan cache dulu biar cepat, sambil update background
+            handler: "CacheFirst",
             options: {
               cacheName: "image-unsplash-cache",
               expiration: {
-                maxEntries: 100, // Simpan maksimal 100 gambar
-                maxAgeSeconds: 60 * 60 * 24 * 7, // Simpan 1 Minggu
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // Simpan 30 Hari
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -66,6 +71,12 @@ export default defineConfig({
             },
           },
         ],
+      },
+
+      // Tambahan: Supaya gampang dites di Localhost
+      devOptions: {
+        enabled: true,
+        navigateFallback: "index.html",
       },
     }),
   ],
